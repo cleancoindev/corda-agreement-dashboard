@@ -1,0 +1,759 @@
+<apex:page showHeader="false" controller="AgreementDashboardController" standardStylesheets="false" >
+<html ng-app="MyApp">
+<head>
+
+    <title>Agreement Dashboard</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <apex:includeScript value="{!URLFOR($Resource.lightning)}/angular.min.js" />
+    <apex:includeScript value="{!URLFOR($Resource.lightning)}/myApp.js" />
+    <apex:includeScript value="{!URLFOR($Resource.lightning)}/components.js" />
+    <apex:slds />
+    <script>
+        var resourcePath = "{!URLFOR($Resource.lightning)}";
+        resourcePath = resourcePath + '/';
+        myApp.value('resourcePath', resourcePath);
+    </script>
+                  <style>
+            .element-container{
+                width: 50%;
+                height: 100%;
+                padding-right: 10px;
+                padding-left: 10px;
+             }
+             .divider{
+                border-right: 1px solid lightgrey;   
+             }
+                
+             .list-container{
+                max-height: 375px;
+                overflow: auto;
+             }
+                
+            </style>
+    <script type="text/javascript">
+    
+    
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        axios.defaults.headers.post['Authorization'] = 'Negotiate';
+    
+        var HTTPUtil = function(instanceConfig){
+            var self = this;
+
+            
+            self.put = function(config){
+                var _url = config.url ? config.url : (instanceConfig && instanceConfig.url ? instanceConfig.url : defaulsConfig.url);
+                var _data = config.data;
+
+                return  axios.put(_url,_data);
+            }
+            
+             self.get = function(config){
+                var _url = config.url ? config.url : (instanceConfig && instanceConfig.url ? instanceConfig.url : defaulsConfig.url);
+                var _data = config.data;
+
+                return  axios.get(_url,_data);
+            }
+             
+                          self.post = function(config){
+                var _url = config.url ? config.url : (instanceConfig && instanceConfig.url ? instanceConfig.url : defaulsConfig.url);
+                var _data = config.data;
+
+                return  axios.post(_url,_data);
+            }
+
+
+        }
+    
+        var httpInstance = new HTTPUtil();
+    
+        
+    
+                var decodeJSON = function(jsonStr){
+                  if(!jsonStr){
+                    return undefined;
+                  }
+                    return jsonStr.replace(/(&quot\;)/g,"\"")
+                }
+                
+                var parseJSON = function(str){
+                    if(str==null || str == undefined || str == ''){
+                        return {};
+                    }
+                    else return JSON.parse(str);
+                } 
+    
+    var myApp = angular.module('MyApp',[]);
+    function MyController($scope,$timeout){
+        
+        
+    $scope.showAlert = false;
+        
+        
+    $scope.showAlertFn = function(sendType,methodName){
+    $scope.showAlert = true;
+    lastSendType = sendType;
+    lastMethodName = methodName;
+        
+    }
+    
+    
+    $scope.showActivateFn = function(sendType,methodName){
+    $scope.showActivate = true;
+    lastSendType = sendType;
+    lastMethodName = methodName;
+        
+    }
+        
+        
+    $scope.msg = [];
+    $scope.addMsg = function(msg){
+           $scope.msg.push(msg); 
+        }
+    
+    
+    $scope.message = 'This is Message';
+    $scope.loadingApplications = false;
+    $scope.loadingAgreements = false;
+        
+        $scope.hideAlert  = function(){
+         $scope.showAlert = false;
+    }
+       
+            $scope.hideActivate = function(){
+           $scope.showActivate = false;
+        
+     }
+    
+        $scope.getAgreements = function(){          
+        	$scope.loadingAgreements = true;
+        	Visualforce.remoting.Manager.invokeAction(
+            	'{!$RemoteAction.AgreementDashboardController.getAgreementRecords}',
+            	function (response, event) {
+                            ////console.log('***result***',response);
+                            if (event.status) {
+                                $scope.agreements = response;
+                                $scope.loadingAgreements = false;
+                                $scope.$apply();
+                            } else if (event.type === 'exception') {
+                                
+                            } else {
+                                
+                            }
+                        }, 
+                        {buffer: true, escape: true, timeout: 120000}
+                    );
+                }
+        
+       if($scope.agreements && $scope.agreements.length > 0){
+                    $scope.step = 'VIEW_AGREEMENTS';
+                }
+        
+      $scope.getAgreements();
+
+        
+      $scope.getMe = function() {
+      $scope.loadingMe = true;
+    	Visualforce.remoting.Manager.invokeAction(
+           '{!$RemoteAction.AgreementDashboardController.getMe}',
+     		function (response) {
+                    console.log(response);
+                    $scope.me = response;
+                    $scope.loadingMe = false;
+                    $scope.$apply();
+                    $scope.showAlert = false;
+                    });
+        
+            }
+        
+      
+      // Create Agreement Function
+      
+      $scope.createAgreement = function() {
+          
+       var reqObj = {};
+        reqObj.accountId=$scope.accountId;
+        reqObj.agreementName=$scope.agreementName;
+        reqObj.agreementNumber=$scope.agreementNumber;
+        reqObj.agreementType=$scope.agreementType;
+        reqObj.agreementStatus=$scope.agreementStatus;
+        reqObj.totalAgreementValue=$scope.totalAgreementValue;
+        reqObj.agreementHash=$scope.agreementHash;
+        reqObj.active=$scope.active;
+        reqObj.otherParty=$scope.otherParty;
+        $scope.showTransferSpinner = true;
+        
+       var dataStr = JSON.stringify(reqObj);
+          
+       Visualforce.remoting.Manager.invokeAction(
+           '{!$RemoteAction.AgreementDashboardController.createAgreement}',
+          function (response) {
+                    console.log(response);                                      
+                    $scope.showTransferSpinner = false;
+                    $scope.showMessage = "dsoa: "+ response.data;
+                    $scope.$apply();
+                    $scope.showAlert = false;
+                  }).catch(function (error) {
+                    console.log(error);
+                    });
+    
+            }
+      
+      
+      // Renew Agreement Function
+      
+       $scope.renewAgreement = function() {
+          
+       var reqObj = {};
+        reqObj.agreementNumber=$scope.agreementNumber;
+        $scope.showTransferSpinner = true;
+        
+       var dataStr = JSON.stringify(reqObj);
+           
+         Visualforce.remoting.Manager.invokeAction(
+             '{!$RemoteAction.AgreementDashboardController.renewAgreement}',
+          
+           function (response) {
+                    console.log(response);                                      
+                    $scope.showTransferSpinner = false;
+                    $scope.showMessage = "dsoa: "+ response.data;
+                    $scope.$apply();
+                    $scope.showAlert = false;
+                  }).catch(function (error) {
+                    console.log(error);
+                    });
+    
+            }
+       
+       
+       
+       // Amend Agreement Function
+       
+       $scope.amendAgreement = function() {
+          
+       var reqObj = {};
+        reqObj.agreementNumber=$scope.agreementNumber;
+        $scope.showTransferSpinner = true;
+        
+       var dataStr = JSON.stringify(reqObj);
+           
+         Visualforce.remoting.Manager.invokeAction(
+             '{!$RemoteAction.AgreementDashboardController.amendAgreement}',
+           
+           function (response) {
+                    console.log(response);                                      
+                    $scope.showTransferSpinner = false;
+                    $scope.showMessage = "dsoa: "+ response.data;
+                    $scope.$apply();
+                    $scope.showAlert = false;
+                  }).catch(function (error) {
+                    console.log(error);
+                    });
+    
+            }
+       
+              
+       
+       // Terminate Agreement Function
+              
+       $scope.terminateAgreement = function() {
+          
+       var reqObj = {};
+        reqObj.agreementNumber=$scope.agreementNumber;
+        $scope.showTransferSpinner = true;
+        
+       var dataStr = JSON.stringify(reqObj);
+           
+       Visualforce.remoting.Manager.invokeAction(
+           '{!$RemoteAction.AgreementDashboardController.terminateAgreement}',
+           
+           function (response) {
+                    console.log(response);                                      
+                    $scope.showTransferSpinner = false;
+                    $scope.showMessage = "dsoa: "+ response.data;
+                    $scope.$apply();
+                    $scope.showAlert = false;
+                  }).catch(function (error) {
+                    console.log(error);
+                    });
+    
+                    
+                    
+              }
+       
+           
+       // Expire Agreement
+       
+       
+      $scope.expireAgreement = function() {
+          
+       var reqObj = {};
+        reqObj.agreementNumber=$scope.agreementNumber;
+        $scope.showTransferSpinner = true;
+        
+       var dataStr = JSON.stringify(reqObj);
+          
+       Visualforce.remoting.Manager.invokeAction(
+           '{!$RemoteAction.AgreementDashboardController.expireAgreement}',
+          
+          function (response) {
+                    console.log(response);                                      
+                    $scope.showTransferSpinner = false;
+                    $scope.showMessage = "dsoa: "+ response.data;
+                    $scope.$apply();
+                    $scope.showAlert = false;
+                  }).catch(function (error) {
+                    console.log(error);
+                    });
+    
+                    
+                    
+              }
+
+      
+        $scope.getMe();
+    
+    }
+      
+      myApp.controller('MyController', MyController);
+      
+    
+    
+    </script>
+    
+    </head>
+    
+         <body ng-controller="MyController">
+       
+        <div class="slds-page-header">
+  <div class="slds-media">
+    <div class="slds-media__body">
+      <h1 class="slds-page-header__title slds-truncate slds-align-middle" title="IOU Dashboard">{!$Label.Agreements_Dashboard}</h1>
+      <p class="slds-text-body_small slds-line-height_reset">
+          ID: {{me}}
+      </p>
+    </div>
+    <div class="slds-page-header__control">
+          <ul class="slds-button-group-row">
+              
+            <li class="slds-button-group-item">
+              <button class="slds-button slds-button_neutral" ng-click="showAlertFn('Transfer')">{!$Label.Create_Agreement}</button>
+            </li>
+            <li class="slds-button-group-item">
+              <button class="slds-button slds-button_neutral" ng-click="showActivateFn('Transfer')">{!$Label.Activate}</button>
+            </li>
+            <li class="slds-button-group-item">
+              <button class="slds-button slds-button_neutral" ng-click="amendAgreement()">{!$Label.Amend}</button>
+            </li>
+            <li class="slds-button-group-item">
+              <button class="slds-button slds-button_neutral" ng-click="terminateAgreement()">{!$Label.Terminate}</button>
+            </li>
+            <li class="slds-button-group-item">
+              <button class="slds-button slds-button_neutral" ng-click="expireAgreement()">{!$Label.Expire}</button>
+            </li>
+             <li class="slds-button-group-item">
+              <button class="slds-button slds-button_neutral" ng-click="renewAgreement()">{!$Label.Renew}</button>
+            </li>
+            <li>
+              <div class="slds-dropdown-trigger slds-dropdown-trigger_click">
+                <button class="slds-button slds-button_icon slds-button_icon-border-filled" aria-haspopup="true" title="More Actions">
+                  <svg class="slds-button__icon" aria-hidden="true">
+                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/utility-sprite/svg/symbols.svg#down" />
+                  </svg>
+                  <span class="slds-assistive-text">More Actions</span>
+                </button>
+              </div>
+            </li>
+          </ul>
+        </div>
+  </div>
+</div>
+        
+        <div class="slds-spinner_container" ng-show="showSpinner">
+  <div role="status" class="slds-spinner slds-spinner--medium">
+    <span class="slds-assistive-text">Loading</span>
+    <div class="slds-spinner__dot-a"></div>
+    <div class="slds-spinner__dot-b"></div>
+  </div>
+</div>
+
+        
+  <div class="slds-grid slds-wrap">
+  <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_2-of-12" style="padding-top: 3px; padding-bottom:28px">
+      
+  <div class="demo-only" style="width: 280px; background-color: #F3F2F2;">
+  <nav class="slds-nav-vertical" aria-label="Sub page">
+      <br/>
+    <div class="slds-form-element slds-p-horizontal_large">
+      <label class="slds-form-element__label slds-assistive-text" for="input-id-01">Filter navigation items</label>
+      <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon_left">
+        <span class="slds-icon_container slds-icon-utility-search">
+          <svg class="slds-icon slds-input__icon slds-input__icon_right slds-icon-text-default" aria-hidden="true">
+            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/utility-sprite/svg/symbols.svg#search" />
+          </svg>
+        </span>
+        <input type="search" id="input-id-01" placeholder="Quick Find" class="slds-input" value="" />
+      </div>
+    </div>
+    <div class="slds-nav-vertical__section">
+      <h2 style="font-weight: bold" class="slds-nav-vertical__title">{!$Label.Agreements}</h2>
+      <ul aria-describedby="entity-header">
+        <li class="slds-nav-vertical__item"><a href="javascript:void(0);" class="slds-nav-vertical__action">{!$Label.Recent}</a></li>
+        <li class="slds-nav-vertical__item"><a href="javascript:void(0);" class="slds-nav-vertical__action">{!$Label.Created_by_Me}</a></li>
+        <li class="slds-nav-vertical__item"><a href="javascript:void(0);" class="slds-nav-vertical__action">{!$Label.Private_Agreements}</a></li>
+        <li class="slds-nav-vertical__item"><a href="javascript:void(0);" class="slds-nav-vertical__action">{!$Label.Public_Agreements}</a></li>
+        <li class="slds-nav-vertical__item"><a href="javascript:void(0);" class="slds-nav-vertical__action">{!$Label.All_Agreements}</a></li>
+      </ul>
+    </div>
+    <div class="slds-nav-vertical__section">
+      <h2 style="font-weight: bold" class="slds-nav-vertical__title">{!$Label.Attachments}</h2>
+      <ul aria-describedby="folder-header">
+        <li class="slds-nav-vertical__item"><a href="javascript:void(0);" class="slds-nav-vertical__action">{!$Label.Created_by_Me}</a></li>
+        <li class="slds-nav-vertical__item"><a href="javascript:void(0);" class="slds-nav-vertical__action">{!$Label.Shared_with_Me}</a></li>
+          <div class="slds-form-element">
+  	<div class="slds-form-element__control" style="padding-left:8px">
+    <div class="slds-file-selector slds-file-selector_files">
+      <div class="slds-file-selector__dropzone">
+        <input class="slds-file-selector__input slds-assistive-text" accept="image/png" type="file" id="file-upload-input-01" aria-labelledby="file-selector-primary-label file-selector-secondary-label" />
+        <label class="slds-file-selector__body" for="file-upload-input-01" id="file-selector-secondary-label">
+          <span class="slds-file-selector__button slds-button slds-button_neutral">
+            <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
+              <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/utility-sprite/svg/symbols.svg#upload" />
+            </svg>{!$Label.Upload_Files}</span>
+          <span class="slds-file-selector__text slds-medium-show"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+</div>
+      </ul>
+    </div>
+     <div class="slds-nav-vertical__section">
+      <h2 style="font-weight: bold" class="slds-nav-vertical__title">{!$Label.Agreement_Line_Items}</h2>
+      <ul aria-describedby="entity-header">
+        <li class="slds-nav-vertical__item"><a href="javascript:void(0);" class="slds-nav-vertical__action">{!$Label.Recent}</a></li>
+        <li class="slds-nav-vertical__item"><a href="javascript:void(0);" class="slds-nav-vertical__action">{!$Label.Created_by_Me}</a></li>
+        <li class="slds-nav-vertical__item"><a href="javascript:void(0);" class="slds-nav-vertical__action">{!$Label.Draft_Agreement_Line_Items}</a></li>
+        <li class="slds-nav-vertical__item"><a href="javascript:void(0);" class="slds-nav-vertical__action">{!$Label.Active_Agreement_Line_Items}</a></li>
+        <li class="slds-nav-vertical__item"><a href="javascript:void(0);" class="slds-nav-vertical__action">{!$Label.All_Agreement_Line_Items}</a></li>
+      </ul>
+    </div>
+  </nav>
+</div> 
+      </div>
+      
+ <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_10-of-12" style="padding-top:28px">    
+ <div style="padding-left: 10px">
+  <div class="" ng-show="!loadingApplications">
+    <br/>
+    <div class="slds-grid slds-grid_vertical">
+      <div>
+        <div style="padding-left:8px" class="slds-media slds-no-space slds-media_center">
+          <div class="slds-media__figure">
+            <div class="slds-icon_container slds-icon-standard-lead">
+              <svg class="slds-icon" aria-hidden="true">
+                  <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/standard-sprite/svg/symbols.svg#contract"></use>
+              </svg>
+              <span class="slds-assistive-text">{!$Label.My_Agreements}</span>
+            </div>
+          </div>
+          <div class="slds-media__body">
+            <h1 class="slds-page-header__title slds-align-middle">{!$Label.My_Agreements}</h1>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    <br/>   
+      <div class="slds-hint-parent">
+      <button class="slds-button slds-button_icon" style="padding-left:8px;padding-bottom:8px" title="Refresh">
+          <svg class="slds-icon slds-icon-text-light slds-icon_x-small" aria-hidden="true">
+          <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/utility-sprite/svg/symbols.svg#refresh"></use>
+          </svg>
+      </button>
+      </div>
+
+    <div class="list-container" >
+        <table class="slds-table slds-max-medium-table_stacked-horizontal slds-table_fixed-layout slds-table_cell-buffer" role="grid">
+            <thead>
+                <tr class="slds-text-title_caps">
+                    <th scope="col">
+                        <div class="slds-truncate" title="Name">{!$Label.Agreement_Number}</div>
+                    </th>
+                    <th scope="col">
+                        <div class="slds-truncate" title="Name">{!$Label.Agreement_Name}</div>
+                    </th>
+                    <th scope="col">
+                        <div class="slds-truncate" title="Type">{!$Label.Type}</div>
+                    </th>
+                    <th scope="col">
+                        <div class="slds-truncate" title="Status">{!$Label.Agreement_Status}</div>
+                    </th>
+                    <th scope="col">
+                        <div class="slds-truncate" title="Account">{!$Label.Party}</div>
+                    </th>
+                    <th scope="col">
+                        <div class="slds-truncate" title="Counterparty">{!$Label.Counterparty}</div>
+                    </th>
+                    <th scope="col">
+                        <div class="slds-truncate" title="Value">{!$Label.Total_Agreement_Value}</div>
+                    </th>              
+                    <th scope="col">
+                        <div class="slds-truncate" title="Agreement Hash">{!$Label.Agreement_Hash}</div>
+                    </th>
+                    <th scope="col">
+                        <div class="slds-truncate" title="Id">{!$Label.Agreement_Id}</div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="agreement in agreements">
+                    <td data-label="Checkbox">
+                        <div>
+                        	<input type="checkbox" name="options" />
+                        </div>
+                    </td>
+                    <td data-label="{!$Label.Agreement_Number}">
+                        <div class="slds-truncate" title="{{agreement.agreementNumber}}">{{agreement.agreementNumber}}</div>
+                    </td>
+                    <td data-label="{!$Label.Agreement_Name}">
+                        <div class="slds-truncate" title="{{agreement.agreementName}}">{{agreement.agreementName}}</div>
+                    </td>
+                    <td data-label="{!$Label.Type}">
+                        <div class="slds-truncate" title="{{agreement.agreementType}}">{{agreement.agreementType}}</div>
+                    </td>
+                    <td data-label="{!$Label.Agreement_Status}">
+                        <div class="slds-truncate" title="{{agreement.agreementStatus}}">{{agreement.agreementStatus}}</div>
+                    </td>
+                    <td data-label="{!$Label.Party}">
+                        <div class="slds-truncate" title="{{agreement.party}">{{agreement.party}}</div>
+                    </td>
+                    <td data-label="{!$Label.Counterparty}">
+                        <div class="slds-truncate" title="{{agreement.counterparty}">{{agreement.counterparty}}</div>
+                    </td>
+                     <td data-label="{!$Label.Total_Agreement_Value}">
+                        <div class="slds-truncate" title="{{agreement.totalAgreementValue}">{{agreement.totalAgreementValue}}</div>
+                    </td>
+                     <td data-table="Contract">
+                        <div class="slds-truncate" title="{{agremeent.agreementHash}">{{agreement.agreementHash}}</div>
+                     </td>
+                     <td data-label="{!$Label.Agreement_Id}">
+                        <div class="slds-truncate" title="{{agreement.linearId}">{{agreement.linearId}}</div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <br/><br/>
+        
+    </div>
+        </div>
+    </div>
+      </div>
+        </div>
+
+            <!--Signer Modal -->
+<div class="demo-only" style="min-height:640px;margin-top: 0px !important;" ng-show="showAlert">
+  <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+    <div class="slds-modal__container">
+      <header class="slds-modal__header">
+        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" ng-click="hideAlert()">
+          <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/utility-sprite/svg/symbols.svg#close"></use>
+          </svg>
+          <span class="slds-assistive-text" >Close</span>
+        </button>
+        <table>
+            <tr>
+                <td style="max-width: 17px;">
+                    <span class="slds-icon_container slds-icon-custom-custom5" title="Description of icon when needed">
+                      <svg class="slds-icon slds-icon_large" aria-hidden="true">
+                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/standard-sprite/svg/symbols.svg#contract"></use>
+                      </svg>
+                      <span class="slds-assistive-text">Description of icon</span>
+                    </span>
+                </td>
+                <td>
+                    <h2 id="modal-heading-01" style="padding-left:17px" class="slds-text-heading_small slds-hyphenate">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;New Agreement</h2>
+                    <p class="slds-text-body_small slds-line-height_reset" style="padding-left:17px">
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Create a New Agreement
+      </p>
+                </td>
+            </tr>
+        </table>
+
+      </header>
+                <form style="padding-left:8px; padding-right:8px; padding-top:28px; padding-bottom:28px" class="slds-card">
+             <div class="slds-form-element">
+            <label class="slds-form-element__label" for="inputSample2">Agreement Number: </label>
+            <input type="text" name="firstName" class="slds-input slds-combobox__input" ng-model="agreementNumber" />
+            </div>
+                    
+                    
+             <div class="slds-form-element">
+            <label class="slds-form-element__label" for="inputSample2">Agreement Name: </label>
+            <input type="text" name="firstName" class="slds-input slds-combobox__input" ng-model="agreementName" />
+            </div>
+            
+            
+            <div class="slds-form-element">
+            <label class="slds-form-element__label" for="inputSample2">Agreement Type: </label>
+            <input type="text" name="firstName" class="slds-input slds-combobox__input" ng-model="agreementType" />
+            </div>
+
+            <div class="slds-form-element">
+            <label class="slds-form-element__label" for="inputSample2">Agreement Status: </label>
+            <input type="text" name="firstName" class="slds-input slds-combobox__input" ng-model="agreementStatus" />
+            </div>
+
+            <div class="slds-form-element">            
+            <label class="slds-form-element__label" for="inputSample2">Counterparty: </label>
+            <input type="text" name="firstName" class="slds-input slds-combobox__input" ng-model="partyName" />
+                </div>
+
+            <div class="slds-form-element">
+            <label class="slds-form-element__label" for="inputSample2">Total Agreement Value:</label>
+            <input type="text" name="firstName" class="slds-input slds-combobox__input" ng-model="totalAgreementValue" />
+            </div>
+                    
+             <div class="slds-form-element">
+                    <label class="slds-form-element__label" >Agreement Hash:</label>
+                    <input type="text" name="firstName" class="slds-input slds-combobox__input" ng-model="agreementHash" />
+             </div>
+
+         
+          <br/>
+ 
+            
+        </form>
+
+      <footer class="slds-modal__footer">
+        <button class="slds-button slds-button_neutral" ng-click="hideAlert()">Cancel</button>
+        <button  class="slds-button slds-button--brand" ng-click="createAgreement()">Create Agreement</button>
+          <img src="https://i.stack.imgur.com/pK4a5.gif" style="width:30px;" ng-show="showTransferSpinner"/>
+          {{showMessage}}
+     </footer>
+      </div>
+  </section>
+  <div class="slds-backdrop slds-backdrop_open"></div>
+        </div>
+         
+         
+         
+
+    
+    
+  <div style="height: 180px;">
+</div>
+         
+         
+                 <!--Activate  Modal-->
+    <div class="demo-only" style="min-height:640px;margin-top: 0px !important;" ng-show="showActivate">
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" ng-click="hideActivate()">
+                        <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/utility-sprite/svg/symbols.svg#close"></use>
+                        </svg>
+                        <span class="slds-assistive-text" >Close</span>
+                    </button>
+                    <table>
+                        <tr>
+                            <td style="max-width: 17px;">
+                                <span class="slds-icon_container slds-icon-custom-custom5" title="Description of icon when needed">
+                                    <svg class="slds-icon slds-icon_large" aria-hidden="true">
+                                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/custom-sprite/svg/symbols.svg#custom18"></use>
+                                    </svg>
+                                    <span class="slds-assistive-text">Description of icon</span>
+                                </span>
+                            </td>
+                            <td>
+                                <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Activate Agreement</h2>
+                                <p class="slds-text-body_small slds-line-height_reset">
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Activate the Agreement and begin next steps to Close Won the Opportunity.
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                    
+                </header>
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1" style="min-height: 300px;">
+                    <ngl-lookup options="accountOptions" config="accountLookupConfig" selectedmodel="selectedAccount" loading="loadingAccount" ></ngl-lookup><br/>
+                    
+                    <fieldset class="slds-form-element" style="border: 1px solid #ebf3fb;padding: 8px;">
+                        <legend class="slds-form-element__legend slds-legend slds-form-element__label">Agreement Details</legend>
+                        
+                        <label class="slds-form-element__label" for="textarea-input-01">Agreement Number</label>
+                        <div class="slds-form-element__control">
+                            <input type="text" class="slds-textarea" ng-model="agreementNumber" placeholder="" size="10" />
+            			</div>
+        			</fieldset>
+                    <br/>
+                    <fieldset class="slds-form-element">
+                        <legend class="slds-form-element__legend slds-form-element__label">Sign using:</legend>
+                        <div class="slds-form-element__control">
+                            <div class="slds-radio_button-group">
+                                <span class="slds-button slds-radio_button">
+                                    <input type="radio" name="radio" id="tuesday" ng-model="signUsingOption" ng-click="onChangeSignOption()" value="E"/>
+                                    <label class="slds-radio_button__label" for="tuesday">
+                                        <span class="slds-radio_faux">Administrator Password</span>
+                                    </label>
+                                </span>
+                                <span class="slds-button slds-radio_button">
+                                    <input type="radio" name="radio" id="wednesday" ng-model="signUsingOption" ng-click="onChangeSignOption()" value="P"/>
+                                    <label class="slds-radio_button__label" for="wednesday">
+                                        <span class="slds-radio_faux">Private Key</span>
+                                    </label>
+                                </span>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <br/>
+                    
+                    <div class="slds-form-element" ng-show="signUsingOption=='E'">
+                        <label class="slds-form-element__label" for="text-input-id-1">Admin Password</label>
+                        <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon_left">
+                            <svg class="slds-icon slds-input__icon slds-input__icon_left slds-icon-text-default" aria-hidden="true">
+                                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/action-sprite/svg/symbols.svg#password_unlock"></use>
+                            </svg>
+                            <input type="password" class="slds-input" placeholder="Enter Password"/>
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div class="slds-form-element" ng-show="signUsingOption=='P'">
+                        <label class="slds-form-element__label" for="text-input-id-1">Private Key</label>
+                        <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon_left">
+                            <svg class="slds-icon slds-input__icon slds-input__icon_left slds-icon-text-default" aria-hidden="true">
+                                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/action-sprite/svg/symbols.svg#password_unlock"></use>
+                            </svg>
+                            <input type="password" class="slds-input" placeholder="Enter Private Key"/>
+                        </div>
+                    </div>
+                    
+                    
+                </div>
+                <footer class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" ng-click="hideActivate()">Cancel</button>
+                    <button class="slds-button slds-button_brand" ng-click="activateAgreement()">
+                        <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
+                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/utility-sprite/svg/symbols.svg#lock"></use>
+                        </svg>Activate Agreement</button>
+                              <img src="https://i.stack.imgur.com/pK4a5.gif" style="width:30px;" ng-show="showTransferSpinner"/>
+          					{{showMessage}}
+       
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </div>
+            
+            
+    </body>
+    
+    
+    </html>
+
+</apex:page>
+                      
