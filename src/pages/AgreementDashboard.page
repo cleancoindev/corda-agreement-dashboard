@@ -103,6 +103,34 @@
     lastMethodName = methodName;
         
     }
+    
+    $scope.showAmendFn = function(sendType,methodName){
+    $scope.showAmend = true;
+    lastSendType = sendType;
+    lastMethodName = methodName;
+        
+    }
+        
+    $scope.showTerminateFn = function(sendType,methodName){
+    $scope.showTerminate = true;
+    lastSendType = sendType;
+    lastMethodName = methodName;
+        
+    }
+    
+    $scope.showExpireFn = function(sendType,methodName){
+    $scope.showExpire = true;
+    lastSendType = sendType;
+    lastMethodName = methodName;
+        
+    }
+            
+    $scope.showRenewFn = function(sendType,methodName){
+    $scope.showRenew = true;
+    lastSendType = sendType;
+    lastMethodName = methodName;
+        
+    }
         
         
     $scope.msg = [];
@@ -119,8 +147,28 @@
          $scope.showAlert = false;
     }
        
-            $scope.hideActivate = function(){
+           $scope.hideActivate = function(){
            $scope.showActivate = false;
+        
+     }
+            
+           $scope.hideAmend = function(){
+           $scope.showAmend = false;
+        
+     }
+                        
+           $scope.hideTerminate = function(){
+           $scope.showTerminate = false;
+        
+     }
+                                    
+           $scope.hideExpire = function(){
+           $scope.showExpire = false;
+        
+     }
+                                                
+           $scope.hideRenew = function(){
+           $scope.showRenew = false;
         
      }
     
@@ -129,7 +177,7 @@
         	Visualforce.remoting.Manager.invokeAction(
             	'{!$RemoteAction.AgreementDashboardController.getAgreementRecords}',
             	function (response, event) {
-                            ////console.log('***result***',response);
+                            console.log(response);
                             if (event.status) {
                                 $scope.agreements = response;
                                 $scope.loadingAgreements = false;
@@ -171,29 +219,30 @@
       $scope.createAgreement = function() {
           
        var reqObj = {};
-        reqObj.accountId=$scope.accountId;
         reqObj.agreementName=$scope.agreementName;
         reqObj.agreementNumber=$scope.agreementNumber;
         reqObj.agreementType=$scope.agreementType;
         reqObj.agreementStatus=$scope.agreementStatus;
         reqObj.totalAgreementValue=$scope.totalAgreementValue;
+        reqObj.agreementStartDate=$scope.agreementStartDate;
+        reqObj.agreementEndDate=$scope.agreementEndDate;
         reqObj.agreementHash=$scope.agreementHash;
-        reqObj.active=$scope.active;
-        reqObj.otherParty=$scope.otherParty;
+        reqObj.counterpartyName=$scope.counterpartyName;
         $scope.showTransferSpinner = true;
         
        var dataStr = JSON.stringify(reqObj);
           
+       console.log(dataStr);
+          
        Visualforce.remoting.Manager.invokeAction(
            '{!$RemoteAction.AgreementDashboardController.createAgreement}',
+           dataStr,
           function (response) {
                     console.log(response);                                      
                     $scope.showTransferSpinner = false;
                     $scope.showMessage = "dsoa: "+ response.data;
                     $scope.$apply();
                     $scope.showAlert = false;
-                  }).catch(function (error) {
-                    console.log(error);
                     });
     
             }
@@ -201,7 +250,7 @@
       
       // Renew Agreement Function
       
-       $scope.renewAgreement = function() {
+       $scope.renewAgreement = function(agreementNumber) {
           
        var reqObj = {};
         reqObj.agreementNumber=$scope.agreementNumber;
@@ -211,11 +260,12 @@
            
          Visualforce.remoting.Manager.invokeAction(
              '{!$RemoteAction.AgreementDashboardController.renewAgreement}',
-          
+           
+           dataStr,
            function (response) {
                     console.log(response);                                      
                     $scope.showTransferSpinner = false;
-                    $scope.showMessage = "dsoa: "+ response.data;
+                    $scope.showMessage = "dsoa: "+ response;
                     $scope.$apply();
                     $scope.showAlert = false;
                   }).catch(function (error) {
@@ -226,19 +276,42 @@
        
        
        
+        // Activate Agreement Function
+       
+       $scope.activateAgreement = function(agreementNumber) {
+           
+
+        var agreementNumber=$scope.agreementNumber;
+        $scope.showTransferSpinner = true;
+        console.log(agreementNumber);
+           
+         Visualforce.remoting.Manager.invokeAction(
+             '{!$RemoteAction.AgreementDashboardController.activateAgreement}',
+           agreementNumber,
+           function (response) {
+                    console.log(response);                                      
+                    $scope.showTransferSpinner = false;
+                    $scope.showMessage = "dsoa: "+ response;
+                    $scope.$apply();
+                    $scope.showAlert = false;
+                    });
+            }
+       
+       
+       
        // Amend Agreement Function
        
-       $scope.amendAgreement = function() {
+       $scope.amendAgreement = function(agreementNumber) {
           
-       var reqObj = {};
-        reqObj.agreementNumber=$scope.agreementNumber;
+
+        var agreementNumber=$scope.agreementNumber;
         $scope.showTransferSpinner = true;
-        
-       var dataStr = JSON.stringify(reqObj);
+        console.log(agreementNumber);
            
          Visualforce.remoting.Manager.invokeAction(
              '{!$RemoteAction.AgreementDashboardController.amendAgreement}',
            
+           agreementNumber,
            function (response) {
                     console.log(response);                                      
                     $scope.showTransferSpinner = false;
@@ -255,21 +328,21 @@
        
        // Terminate Agreement Function
               
-       $scope.terminateAgreement = function() {
+       $scope.terminateAgreement = function(agreementNumber) {
           
-       var reqObj = {};
-        reqObj.agreementNumber=$scope.agreementNumber;
+
+        var agreementNumber=$scope.agreementNumber;
         $scope.showTransferSpinner = true;
-        
-       var dataStr = JSON.stringify(reqObj);
+        console.log(agreementNumber);
            
        Visualforce.remoting.Manager.invokeAction(
            '{!$RemoteAction.AgreementDashboardController.terminateAgreement}',
            
+           agreementNumber,
            function (response) {
                     console.log(response);                                      
                     $scope.showTransferSpinner = false;
-                    $scope.showMessage = "dsoa: "+ response.data;
+                    $scope.showMessage = "dsoa: "+ response;
                     $scope.$apply();
                     $scope.showAlert = false;
                   }).catch(function (error) {
@@ -284,21 +357,21 @@
        // Expire Agreement
        
        
-      $scope.expireAgreement = function() {
+      $scope.expireAgreement = function(agreementNumber) {
           
-       var reqObj = {};
-        reqObj.agreementNumber=$scope.agreementNumber;
+
+        var agreementNumber=$scope.agreementNumber;
         $scope.showTransferSpinner = true;
-        
-       var dataStr = JSON.stringify(reqObj);
+        console.log(agreementNumber);
           
        Visualforce.remoting.Manager.invokeAction(
            '{!$RemoteAction.AgreementDashboardController.expireAgreement}',
           
+          agreementNumber,
           function (response) {
                     console.log(response);                                      
                     $scope.showTransferSpinner = false;
-                    $scope.showMessage = "dsoa: "+ response.data;
+                    $scope.showMessage = "dsoa: "+ response;
                     $scope.$apply();
                     $scope.showAlert = false;
                   }).catch(function (error) {
@@ -327,9 +400,9 @@
         <div class="slds-page-header">
   <div class="slds-media">
     <div class="slds-media__body">
-      <h1 class="slds-page-header__title slds-truncate slds-align-middle" title="IOU Dashboard">{!$Label.Agreements_Dashboard}</h1>
+      <h1 class="slds-page-header__title slds-truncate slds-align-middle" title="Agreement Dashboard">{!$Label.Agreements_Dashboard}</h1>
       <p class="slds-text-body_small slds-line-height_reset">
-          ID: {{me}}
+          ID: O=PartyC,L=San Francisco,C=US
       </p>
     </div>
     <div class="slds-page-header__control">
@@ -342,16 +415,16 @@
               <button class="slds-button slds-button_neutral" ng-click="showActivateFn('Transfer')">{!$Label.Activate}</button>
             </li>
             <li class="slds-button-group-item">
-              <button class="slds-button slds-button_neutral" ng-click="amendAgreement()">{!$Label.Amend}</button>
+              <button class="slds-button slds-button_neutral" ng-click="showAmendFn('Transfer')">{!$Label.Amend}</button>
             </li>
             <li class="slds-button-group-item">
-              <button class="slds-button slds-button_neutral" ng-click="terminateAgreement()">{!$Label.Terminate}</button>
+              <button class="slds-button slds-button_neutral" ng-click="showTerminateFn('Transfer')">{!$Label.Terminate}</button>
             </li>
             <li class="slds-button-group-item">
-              <button class="slds-button slds-button_neutral" ng-click="expireAgreement()">{!$Label.Expire}</button>
+              <button class="slds-button slds-button_neutral" ng-click="showExpireFn('Transfer')">{!$Label.Expire}</button>
             </li>
              <li class="slds-button-group-item">
-              <button class="slds-button slds-button_neutral" ng-click="renewAgreement()">{!$Label.Renew}</button>
+              <button class="slds-button slds-button_neutral" ng-click="showRenewFn('Transfer')">{!$Label.Renew}</button>
             </li>
             <li>
               <div class="slds-dropdown-trigger slds-dropdown-trigger_click">
@@ -477,6 +550,9 @@
             <thead>
                 <tr class="slds-text-title_caps">
                     <th scope="col">
+                        <div class="slds-truncate" title="Name">Id</div>
+                    </th>
+                    <th scope="col">
                         <div class="slds-truncate" title="Name">{!$Label.Agreement_Number}</div>
                     </th>
                     <th scope="col">
@@ -497,45 +573,34 @@
                     <th scope="col">
                         <div class="slds-truncate" title="Value">{!$Label.Total_Agreement_Value}</div>
                     </th>              
-                    <th scope="col">
-                        <div class="slds-truncate" title="Agreement Hash">{!$Label.Agreement_Hash}</div>
-                    </th>
-                    <th scope="col">
-                        <div class="slds-truncate" title="Id">{!$Label.Agreement_Id}</div>
-                    </th>
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="agreement in agreements">
+                <tr ng-repeat="agreement in agreements track by $index">
                     <td data-label="Checkbox">
-                        <div>
-                        	<input type="checkbox" name="options" />
-                        </div>
-                    </td>
+						<div class="slds-truncate" title="{{agreement.Id}}">{{agreement.Id}}</div>
+                    </td>    
                     <td data-label="{!$Label.Agreement_Number}">
-                        <div class="slds-truncate" title="{{agreement.agreementNumber}}">{{agreement.agreementNumber}}</div>
+                        <div class="slds-truncate" title="{{agreement.dsoa__agreementNumber__c}}">{{agreement.dsoa__agreementNumber__c}}</div>
                     </td>
                     <td data-label="{!$Label.Agreement_Name}">
-                        <div class="slds-truncate" title="{{agreement.agreementName}}">{{agreement.agreementName}}</div>
+                        <div class="slds-truncate" title="{{agreement.dsoa__agreementName__c}}">{{agreement.dsoa__agreementName__c}}</div>
                     </td>
                     <td data-label="{!$Label.Type}">
-                        <div class="slds-truncate" title="{{agreement.agreementType}}">{{agreement.agreementType}}</div>
+                        <div class="slds-truncate" title="{{agreement.dsoa__agreementType__c}}">{{agreement.dsoa__agreementType__c}}</div>
                     </td>
                     <td data-label="{!$Label.Agreement_Status}">
-                        <div class="slds-truncate" title="{{agreement.agreementStatus}}">{{agreement.agreementStatus}}</div>
+                        <div class="slds-truncate" title="{{agreement.dsoa__agreementStatus__c}}">{{agreement.dsoa__agreementStatus__c}}</div>
                     </td>
                     <td data-label="{!$Label.Party}">
-                        <div class="slds-truncate" title="{{agreement.party}">{{agreement.party}}</div>
+                        <div class="slds-truncate" title="{{agreement.dsoa__party__c}">{{agreement.dsoa__party__c}}</div>
                     </td>
                     <td data-label="{!$Label.Counterparty}">
-                        <div class="slds-truncate" title="{{agreement.counterparty}">{{agreement.counterparty}}</div>
+                        <div class="slds-truncate" title="{{agreement.dsoa__counterparty__c}">{{agreement.dsoa__counterparty__c}}</div>
                     </td>
                      <td data-label="{!$Label.Total_Agreement_Value}">
-                        <div class="slds-truncate" title="{{agreement.totalAgreementValue}">{{agreement.totalAgreementValue}}</div>
+                        <div class="slds-truncate" title="{{agreement.dsoa__totalAgreementValue__c}">{{agreement.dsoa__totalAgreementValue__c}}</div>
                     </td>
-                     <td data-table="Contract">
-                        <div class="slds-truncate" title="{{agremeent.agreementHash}">{{agreement.agreementHash}}</div>
-                     </td>
                      <td data-label="{!$Label.Agreement_Id}">
                         <div class="slds-truncate" title="{{agreement.linearId}">{{agreement.linearId}}</div>
                     </td>
@@ -603,10 +668,20 @@
             <label class="slds-form-element__label" for="inputSample2">Agreement Status: </label>
             <input type="text" name="firstName" class="slds-input slds-combobox__input" ng-model="agreementStatus" />
             </div>
+                    
+            <div class="slds-form-element">
+            <label class="slds-form-element__label" for="inputSample2">Agreement Start Date: </label>
+            <input type="text" name="firstName" class="slds-input slds-combobox__input" ng-model="agreementStartDate" />
+            </div>
+                    
+            <div class="slds-form-element">
+            <label class="slds-form-element__label" for="inputSample2">Agreement End Date: </label>
+            <input type="text" name="firstName" class="slds-input slds-combobox__input" ng-model="agreementEndDate" />
+            </div>
 
             <div class="slds-form-element">            
             <label class="slds-form-element__label" for="inputSample2">Counterparty: </label>
-            <input type="text" name="firstName" class="slds-input slds-combobox__input" ng-model="partyName" />
+            <input type="text" name="firstName" class="slds-input slds-combobox__input" ng-model="counterpartyName" />
                 </div>
 
             <div class="slds-form-element">
@@ -748,6 +823,529 @@
         </section>
         <div class="slds-backdrop slds-backdrop_open"></div>
     </div>
+             
+             
+                              <!--Activate  Modal-->
+    <div class="demo-only" style="min-height:640px;margin-top: 0px !important;" ng-show="showActivate">
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" ng-click="hideActivate()">
+                        <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/utility-sprite/svg/symbols.svg#close"></use>
+                        </svg>
+                        <span class="slds-assistive-text" >Close</span>
+                    </button>
+                    <table>
+                        <tr>
+                            <td style="max-width: 17px;">
+                                <span class="slds-icon_container slds-icon-custom-custom5" title="Description of icon when needed">
+                                    <svg class="slds-icon slds-icon_large" aria-hidden="true">
+                                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/custom-sprite/svg/symbols.svg#custom18"></use>
+                                    </svg>
+                                    <span class="slds-assistive-text">Description of icon</span>
+                                </span>
+                            </td>
+                            <td>
+                                <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Activate Agreement</h2>
+                                <p class="slds-text-body_small slds-line-height_reset">
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Activate the Agreement and begin next steps to Close Won the Opportunity.
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                    
+                </header>
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1" style="min-height: 300px;">
+                    <ngl-lookup options="accountOptions" config="accountLookupConfig" selectedmodel="selectedAccount" loading="loadingAccount" ></ngl-lookup><br/>
+                    
+                    <fieldset class="slds-form-element" style="border: 1px solid #ebf3fb;padding: 8px;">
+                        <legend class="slds-form-element__legend slds-legend slds-form-element__label">Agreement Details</legend>
+                        
+                        <label class="slds-form-element__label" for="textarea-input-01">Agreement Number</label>
+                        <div class="slds-form-element__control">
+                            <input type="text" class="slds-textarea" ng-model="agreementNumber" placeholder="" size="10" />
+            			</div>
+        			</fieldset>
+                    <br/>
+                    <fieldset class="slds-form-element">
+                        <legend class="slds-form-element__legend slds-form-element__label">Sign using:</legend>
+                        <div class="slds-form-element__control">
+                            <div class="slds-radio_button-group">
+                                <span class="slds-button slds-radio_button">
+                                    <input type="radio" name="radio" id="tuesday" ng-model="signUsingOption" ng-click="onChangeSignOption()" value="E"/>
+                                    <label class="slds-radio_button__label" for="tuesday">
+                                        <span class="slds-radio_faux">Administrator Password</span>
+                                    </label>
+                                </span>
+                                <span class="slds-button slds-radio_button">
+                                    <input type="radio" name="radio" id="wednesday" ng-model="signUsingOption" ng-click="onChangeSignOption()" value="P"/>
+                                    <label class="slds-radio_button__label" for="wednesday">
+                                        <span class="slds-radio_faux">Private Key</span>
+                                    </label>
+                                </span>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <br/>
+                    
+                    <div class="slds-form-element" ng-show="signUsingOption=='E'">
+                        <label class="slds-form-element__label" for="text-input-id-1">Admin Password</label>
+                        <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon_left">
+                            <svg class="slds-icon slds-input__icon slds-input__icon_left slds-icon-text-default" aria-hidden="true">
+                                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/action-sprite/svg/symbols.svg#password_unlock"></use>
+                            </svg>
+                            <input type="password" class="slds-input" placeholder="Enter Password"/>
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div class="slds-form-element" ng-show="signUsingOption=='P'">
+                        <label class="slds-form-element__label" for="text-input-id-1">Private Key</label>
+                        <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon_left">
+                            <svg class="slds-icon slds-input__icon slds-input__icon_left slds-icon-text-default" aria-hidden="true">
+                                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/action-sprite/svg/symbols.svg#password_unlock"></use>
+                            </svg>
+                            <input type="password" class="slds-input" placeholder="Enter Private Key"/>
+                        </div>
+                    </div>
+                    
+                    
+                </div>
+                <footer class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" ng-click="hideActivate()">Cancel</button>
+                    <button class="slds-button slds-button_brand" ng-click="activateAgreement()">
+                        <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
+                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/utility-sprite/svg/symbols.svg#lock"></use>
+                        </svg>Activate Agreement</button>
+                              <img src="https://i.stack.imgur.com/pK4a5.gif" style="width:30px;" ng-show="showTransferSpinner"/>
+          					{{showMessage}}
+       
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </div>
+             
+             
+                              <!--Activate  Modal-->
+    <div class="demo-only" style="min-height:640px;margin-top: 0px !important;" ng-show="showAmend">
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" ng-click="hideAmend()">
+                        <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/utility-sprite/svg/symbols.svg#close"></use>
+                        </svg>
+                        <span class="slds-assistive-text" >Close</span>
+                    </button>
+                    <table>
+                        <tr>
+                            <td style="max-width: 17px;">
+                                <span class="slds-icon_container slds-icon-custom-custom5" title="Description of icon when needed">
+                                    <svg class="slds-icon slds-icon_large" aria-hidden="true">
+                                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/custom-sprite/svg/symbols.svg#custom18"></use>
+                                    </svg>
+                                    <span class="slds-assistive-text">Description of icon</span>
+                                </span>
+                            </td>
+                            <td>
+                                <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Amend Agreement</h2>
+                                <p class="slds-text-body_small slds-line-height_reset">
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Amend the Agreement.
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                    
+                </header>
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1" style="min-height: 300px;">
+                    <ngl-lookup options="accountOptions" config="accountLookupConfig" selectedmodel="selectedAccount" loading="loadingAccount" ></ngl-lookup><br/>
+                    
+                    <fieldset class="slds-form-element" style="border: 1px solid #ebf3fb;padding: 8px;">
+                        <legend class="slds-form-element__legend slds-legend slds-form-element__label">Agreement Details</legend>
+                        
+                        <label class="slds-form-element__label" for="textarea-input-01">Agreement Number</label>
+                        <div class="slds-form-element__control">
+                            <input type="text" class="slds-textarea" ng-model="agreementNumber" placeholder="" size="10" />
+            			</div>
+        			</fieldset>
+                    <br/>
+                    <fieldset class="slds-form-element">
+                        <legend class="slds-form-element__legend slds-form-element__label">Sign using:</legend>
+                        <div class="slds-form-element__control">
+                            <div class="slds-radio_button-group">
+                                <span class="slds-button slds-radio_button">
+                                    <input type="radio" name="radio" id="tuesday" ng-model="signUsingOption" ng-click="onChangeSignOption()" value="E"/>
+                                    <label class="slds-radio_button__label" for="tuesday">
+                                        <span class="slds-radio_faux">Administrator Password</span>
+                                    </label>
+                                </span>
+                                <span class="slds-button slds-radio_button">
+                                    <input type="radio" name="radio" id="wednesday" ng-model="signUsingOption" ng-click="onChangeSignOption()" value="P"/>
+                                    <label class="slds-radio_button__label" for="wednesday">
+                                        <span class="slds-radio_faux">Private Key</span>
+                                    </label>
+                                </span>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <br/>
+                    
+                    <div class="slds-form-element" ng-show="signUsingOption=='E'">
+                        <label class="slds-form-element__label" for="text-input-id-1">Admin Password</label>
+                        <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon_left">
+                            <svg class="slds-icon slds-input__icon slds-input__icon_left slds-icon-text-default" aria-hidden="true">
+                                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/action-sprite/svg/symbols.svg#password_unlock"></use>
+                            </svg>
+                            <input type="password" class="slds-input" placeholder="Enter Password"/>
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div class="slds-form-element" ng-show="signUsingOption=='P'">
+                        <label class="slds-form-element__label" for="text-input-id-1">Private Key</label>
+                        <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon_left">
+                            <svg class="slds-icon slds-input__icon slds-input__icon_left slds-icon-text-default" aria-hidden="true">
+                                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/action-sprite/svg/symbols.svg#password_unlock"></use>
+                            </svg>
+                            <input type="password" class="slds-input" placeholder="Enter Private Key"/>
+                        </div>
+                    </div>
+                    
+                    
+                </div>
+                <footer class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" ng-click="hideAmend()">Cancel</button>
+                    <button class="slds-button slds-button_brand" ng-click="amendAgreement()">
+                        <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
+                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/utility-sprite/svg/symbols.svg#lock"></use>
+                        </svg>Amend Agreement</button>
+                              <img src="https://i.stack.imgur.com/pK4a5.gif" style="width:30px;" ng-show="showTransferSpinner"/>
+          					{{showMessage}}
+       
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </div>
+             
+             
+                              <!--Activate  Modal-->
+    <div class="demo-only" style="min-height:640px;margin-top: 0px !important;" ng-show="showTerminate">
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" ng-click="hideTerminate()">
+                        <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/utility-sprite/svg/symbols.svg#close"></use>
+                        </svg>
+                        <span class="slds-assistive-text" >Close</span>
+                    </button>
+                    <table>
+                        <tr>
+                            <td style="max-width: 17px;">
+                                <span class="slds-icon_container slds-icon-custom-custom5" title="Description of icon when needed">
+                                    <svg class="slds-icon slds-icon_large" aria-hidden="true">
+                                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/custom-sprite/svg/symbols.svg#custom18"></use>
+                                    </svg>
+                                    <span class="slds-assistive-text">Description of icon</span>
+                                </span>
+                            </td>
+                            <td>
+                                <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Terminate Agreement</h2>
+                                <p class="slds-text-body_small slds-line-height_reset">
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Terminate the Agreement with the Counterparty.
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                    
+                </header>
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1" style="min-height: 300px;">
+                    <ngl-lookup options="accountOptions" config="accountLookupConfig" selectedmodel="selectedAccount" loading="loadingAccount" ></ngl-lookup><br/>
+                    
+                    <fieldset class="slds-form-element" style="border: 1px solid #ebf3fb;padding: 8px;">
+                        <legend class="slds-form-element__legend slds-legend slds-form-element__label">Agreement Details</legend>
+                        
+                        <label class="slds-form-element__label" for="textarea-input-01">Agreement Number</label>
+                        <div class="slds-form-element__control">
+                            <input type="text" class="slds-textarea" ng-model="agreementNumber" placeholder="" size="10" />
+            			</div>
+        			</fieldset>
+                    <br/>
+                    <fieldset class="slds-form-element">
+                        <legend class="slds-form-element__legend slds-form-element__label">Sign using:</legend>
+                        <div class="slds-form-element__control">
+                            <div class="slds-radio_button-group">
+                                <span class="slds-button slds-radio_button">
+                                    <input type="radio" name="radio" id="tuesday" ng-model="signUsingOption" ng-click="onChangeSignOption()" value="E"/>
+                                    <label class="slds-radio_button__label" for="tuesday">
+                                        <span class="slds-radio_faux">Administrator Password</span>
+                                    </label>
+                                </span>
+                                <span class="slds-button slds-radio_button">
+                                    <input type="radio" name="radio" id="wednesday" ng-model="signUsingOption" ng-click="onChangeSignOption()" value="P"/>
+                                    <label class="slds-radio_button__label" for="wednesday">
+                                        <span class="slds-radio_faux">Private Key</span>
+                                    </label>
+                                </span>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <br/>
+                    
+                    <div class="slds-form-element" ng-show="signUsingOption=='E'">
+                        <label class="slds-form-element__label" for="text-input-id-1">Admin Password</label>
+                        <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon_left">
+                            <svg class="slds-icon slds-input__icon slds-input__icon_left slds-icon-text-default" aria-hidden="true">
+                                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/action-sprite/svg/symbols.svg#password_unlock"></use>
+                            </svg>
+                            <input type="password" class="slds-input" placeholder="Enter Password"/>
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div class="slds-form-element" ng-show="signUsingOption=='P'">
+                        <label class="slds-form-element__label" for="text-input-id-1">Private Key</label>
+                        <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon_left">
+                            <svg class="slds-icon slds-input__icon slds-input__icon_left slds-icon-text-default" aria-hidden="true">
+                                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/action-sprite/svg/symbols.svg#password_unlock"></use>
+                            </svg>
+                            <input type="password" class="slds-input" placeholder="Enter Private Key"/>
+                        </div>
+                    </div>
+                    
+                    
+                </div>
+                <footer class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" ng-click="hideTerminate()">Cancel</button>
+                    <button class="slds-button slds-button_brand" ng-click="terminateAgreement()">
+                        <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
+                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/utility-sprite/svg/symbols.svg#lock"></use>
+                        </svg>Terminate Agreement</button>
+                              <img src="https://i.stack.imgur.com/pK4a5.gif" style="width:30px;" ng-show="showTransferSpinner"/>
+          					{{showMessage}}
+       
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </div>
+             
+                              <!--Activate  Modal-->
+    <div class="demo-only" style="min-height:640px;margin-top: 0px !important;" ng-show="showExpire">
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" ng-click="hideExpire()">
+                        <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/utility-sprite/svg/symbols.svg#close"></use>
+                        </svg>
+                        <span class="slds-assistive-text" >Close</span>
+                    </button>
+                    <table>
+                        <tr>
+                            <td style="max-width: 17px;">
+                                <span class="slds-icon_container slds-icon-custom-custom5" title="Description of icon when needed">
+                                    <svg class="slds-icon slds-icon_large" aria-hidden="true">
+                                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/custom-sprite/svg/symbols.svg#custom18"></use>
+                                    </svg>
+                                    <span class="slds-assistive-text">Description of icon</span>
+                                </span>
+                            </td>
+                            <td>
+                                <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Expire Agreement</h2>
+                                <p class="slds-text-body_small slds-line-height_reset">
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Expire the Agreement.
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                    
+                </header>
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1" style="min-height: 300px;">
+                    <ngl-lookup options="accountOptions" config="accountLookupConfig" selectedmodel="selectedAccount" loading="loadingAccount" ></ngl-lookup><br/>
+                    
+                    <fieldset class="slds-form-element" style="border: 1px solid #ebf3fb;padding: 8px;">
+                        <legend class="slds-form-element__legend slds-legend slds-form-element__label">Agreement Details</legend>
+                        
+                        <label class="slds-form-element__label" for="textarea-input-01">Agreement Number</label>
+                        <div class="slds-form-element__control">
+                            <input type="text" class="slds-textarea" ng-model="agreementNumber" placeholder="" size="10" />
+            			</div>
+        			</fieldset>
+                    <br/>
+                    <fieldset class="slds-form-element">
+                        <legend class="slds-form-element__legend slds-form-element__label">Sign using:</legend>
+                        <div class="slds-form-element__control">
+                            <div class="slds-radio_button-group">
+                                <span class="slds-button slds-radio_button">
+                                    <input type="radio" name="radio" id="tuesday" ng-model="signUsingOption" ng-click="onChangeSignOption()" value="E"/>
+                                    <label class="slds-radio_button__label" for="tuesday">
+                                        <span class="slds-radio_faux">Administrator Password</span>
+                                    </label>
+                                </span>
+                                <span class="slds-button slds-radio_button">
+                                    <input type="radio" name="radio" id="wednesday" ng-model="signUsingOption" ng-click="onChangeSignOption()" value="P"/>
+                                    <label class="slds-radio_button__label" for="wednesday">
+                                        <span class="slds-radio_faux">Private Key</span>
+                                    </label>
+                                </span>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <br/>
+                    
+                    <div class="slds-form-element" ng-show="signUsingOption=='E'">
+                        <label class="slds-form-element__label" for="text-input-id-1">Admin Password</label>
+                        <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon_left">
+                            <svg class="slds-icon slds-input__icon slds-input__icon_left slds-icon-text-default" aria-hidden="true">
+                                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/action-sprite/svg/symbols.svg#password_unlock"></use>
+                            </svg>
+                            <input type="password" class="slds-input" placeholder="Enter Password"/>
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div class="slds-form-element" ng-show="signUsingOption=='P'">
+                        <label class="slds-form-element__label" for="text-input-id-1">Private Key</label>
+                        <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon_left">
+                            <svg class="slds-icon slds-input__icon slds-input__icon_left slds-icon-text-default" aria-hidden="true">
+                                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/action-sprite/svg/symbols.svg#password_unlock"></use>
+                            </svg>
+                            <input type="password" class="slds-input" placeholder="Enter Private Key"/>
+                        </div>
+                    </div>
+                    
+                    
+                </div>
+                <footer class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" ng-click="hideExpire()">Cancel</button>
+                    <button class="slds-button slds-button_brand" ng-click="expireAgreement()">
+                        <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
+                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/utility-sprite/svg/symbols.svg#lock"></use>
+                        </svg>Expire Agreement</button>
+                              <img src="https://i.stack.imgur.com/pK4a5.gif" style="width:30px;" ng-show="showTransferSpinner"/>
+          					{{showMessage}}
+       
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </div>
+             
+                                           <!-- Renew  Modal-->
+    <div class="demo-only" style="min-height:640px;margin-top: 0px !important;" ng-show="showRenew">
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" ng-click="hideRenew()">
+                        <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/utility-sprite/svg/symbols.svg#close"></use>
+                        </svg>
+                        <span class="slds-assistive-text" >Close</span>
+                    </button>
+                    <table>
+                        <tr>
+                            <td style="max-width: 17px;">
+                                <span class="slds-icon_container slds-icon-custom-custom5" title="Description of icon when needed">
+                                    <svg class="slds-icon slds-icon_large" aria-hidden="true">
+                                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/custom-sprite/svg/symbols.svg#custom18"></use>
+                                    </svg>
+                                    <span class="slds-assistive-text">Description of icon</span>
+                                </span>
+                            </td>
+                            <td>
+                                <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Renew Agreement</h2>
+                                <p class="slds-text-body_small slds-line-height_reset">
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Renew the Agreement.
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                    
+                </header>
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1" style="min-height: 300px;">
+                    <ngl-lookup options="accountOptions" config="accountLookupConfig" selectedmodel="selectedAccount" loading="loadingAccount" ></ngl-lookup><br/>
+                    
+                    <fieldset class="slds-form-element" style="border: 1px solid #ebf3fb;padding: 8px;">
+                        <legend class="slds-form-element__legend slds-legend slds-form-element__label">Agreement Details</legend>
+                        
+                        <label class="slds-form-element__label" for="textarea-input-01">Agreement Number</label>
+                        <div class="slds-form-element__control">
+                            <input type="text" class="slds-textarea" ng-model="agreementNumber" placeholder="" size="10" />
+            			</div>
+        			</fieldset>
+                    <br/>
+                    <fieldset class="slds-form-element">
+                        <legend class="slds-form-element__legend slds-form-element__label">Sign using:</legend>
+                        <div class="slds-form-element__control">
+                            <div class="slds-radio_button-group">
+                                <span class="slds-button slds-radio_button">
+                                    <input type="radio" name="radio" id="tuesday" ng-model="signUsingOption" ng-click="onChangeSignOption()" value="E"/>
+                                    <label class="slds-radio_button__label" for="tuesday">
+                                        <span class="slds-radio_faux">Administrator Password</span>
+                                    </label>
+                                </span>
+                                <span class="slds-button slds-radio_button">
+                                    <input type="radio" name="radio" id="wednesday" ng-model="signUsingOption" ng-click="onChangeSignOption()" value="P"/>
+                                    <label class="slds-radio_button__label" for="wednesday">
+                                        <span class="slds-radio_faux">Private Key</span>
+                                    </label>
+                                </span>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <br/>
+                    
+                    <div class="slds-form-element" ng-show="signUsingOption=='E'">
+                        <label class="slds-form-element__label" for="text-input-id-1">Admin Password</label>
+                        <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon_left">
+                            <svg class="slds-icon slds-input__icon slds-input__icon_left slds-icon-text-default" aria-hidden="true">
+                                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/action-sprite/svg/symbols.svg#password_unlock"></use>
+                            </svg>
+                            <input type="password" class="slds-input" placeholder="Enter Password"/>
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div class="slds-form-element" ng-show="signUsingOption=='P'">
+                        <label class="slds-form-element__label" for="text-input-id-1">Private Key</label>
+                        <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon_left">
+                            <svg class="slds-icon slds-input__icon slds-input__icon_left slds-icon-text-default" aria-hidden="true">
+                                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/action-sprite/svg/symbols.svg#password_unlock"></use>
+                            </svg>
+                            <input type="password" class="slds-input" placeholder="Enter Private Key"/>
+                        </div>
+                    </div>
+                    
+                    
+                </div>
+                <footer class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" ng-click="hideRenew()">Cancel</button>
+                    <button class="slds-button slds-button_brand" ng-click="renewAgreement()">
+                        <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
+                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.lightning)}/assets/icons/utility-sprite/svg/symbols.svg#lock"></use>
+                        </svg>Renew Agreement</button>
+                              <img src="https://i.stack.imgur.com/pK4a5.gif" style="width:30px;" ng-show="showTransferSpinner"/>
+          					{{showMessage}}
+       
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </div>
             
             
     </body>
@@ -756,4 +1354,3 @@
     </html>
 
 </apex:page>
-                      
