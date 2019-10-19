@@ -261,7 +261,7 @@
          Visualforce.remoting.Manager.invokeAction(
              '{!$RemoteAction.AgreementDashboardController.renewAgreement}',
            
-           dataStr,
+           agreementNumber,
            function (response) {
                     console.log(response);                                      
                     $scope.showTransferSpinner = false;
