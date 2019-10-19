@@ -104,7 +104,7 @@ global with sharing class AgreementDashboardController {
     global static String terminateAgreement(String agreementNumber) {
         Http httpProtocol = new Http();
         HttpRequest request = new HttpRequest();
-        request.setEndPoint('callout:DSOA_Network_API' + '/api/' + dsoaCommonUtils.NODE_NAME + 'terminateAgreement?agreementNumber=' + agreementNumber);
+        request.setEndPoint('callout:DSOA_Network_API' + '/api/' + dsoaCommonUtils.NODE_NAME + '/terminateAgreement?agreementNumber=' + agreementNumber);
         request.setMethod('POST');
         HttpResponse response = httpProtocol.send(request);
         return response.getBody();
