@@ -5,7 +5,10 @@ Install the Dappsync managed package (Dappsync 1.3 (Beta 7)):
 
 https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1U0000058VV1
 
+
+```
 sfdx force:package:install --package 04t1U0000058VV1AAA
+```
 
 Once the managed package is installed, you will need to setup your Custom Metadata Types, sync with you Corda Node and add the Agreement Dashboard Tab to your navigation.
 
