@@ -1,4 +1,4 @@
-// Dapps Incorporated 2020. All Rights Reserved.
+// Dapps Incorporated. 2020. All Rights Reserved.
 
 global with sharing class AgreementDashboardController {
     
@@ -30,18 +30,11 @@ global with sharing class AgreementDashboardController {
     }    
     
     
-        
-        
+            
     @RemoteAction
     public static String getMe() {
-        string url;
-        url = 'callout:DSOA_Network_API' + '/api/nodes/ ' + dsoaCommonUtils.NODE_NAME + '/me';
-        Http httpProtocol = new Http();
-        HttpRequest request = new HttpRequest();
-        request.setEndPoint(url);
-        request.setMethod('GET');
-        HttpResponse response = httpProtocol.send(request);
-        return response.getBody();
+        
+        return dsoaCommonUtils.NODE_NAME;
     }
     
     
@@ -49,32 +42,35 @@ global with sharing class AgreementDashboardController {
     public static String getAgreements() {
         string url;
         string webserverPort;
-        url = 'callout:DSOA_Network_API' + '/api/' + dsoaCommonUtils.NODE_NAME + '/getAgreements';
+        url = dsoaCommonUtils.NODE_URL + '/api/' + dsoaCommonUtils.NODE_NAME + '/getAgreements';
         Http httpProtocol = new Http();
         HttpRequest request = new HttpRequest();
         request.setEndPoint(url);
         request.setMethod('GET');
         HttpResponse response = httpProtocol.send(request);
         return response.getBody();
+        
+        
+        
     }
-    
     
     @RemoteAction
     global static String createAgreement(String body) {
         Http httpProtocol = new Http();
         HttpRequest request = new HttpRequest();
-        request.setEndPoint('callout:DSOA_Network_API' + '/api' + dsoaCommonUtils.NODE_NAME + '/createAgreement');
+        request.setEndPoint(dsoaCommonUtils.NODE_URL + '/api' + dsoaCommonUtils.NODE_NAME + '/createAgreement');
         request.setMethod('POST');
         request.setBody(body);
         HttpResponse response = httpProtocol.send(request);
         return response.getBody();
     }
     
+    
     @RemoteAction
     global static String activateAgreement(String agreementNumber) {
         Http httpProtocol = new Http();
         HttpRequest request = new HttpRequest();
-        request.setEndPoint('callout:DSOA_Network_API' + '/api/' + dsoaCommonUtils.NODE_NAME + '/activateAgreement?agreementNumber=' + agreementNumber);
+        request.setEndPoint(dsoaCommonUtils.NODE_URL + '/api/' + dsoaCommonUtils.NODE_NAME + '/activateAgreement?agreementNumber=' + agreementNumber);
         request.setMethod('POST');
         HttpResponse response = httpProtocol.send(request);
         return response.getBody();
@@ -84,7 +80,7 @@ global with sharing class AgreementDashboardController {
     global static String renewAgreement(String agreementNumber) {
         Http httpProtocol = new Http();
         HttpRequest request = new HttpRequest();
-        request.setEndPoint('callout:DSOA_Network_API' + '/api/' + dsoaCommonUtils.NODE_NAME + '/renewAgreement?agreementNumber=' + agreementNumber);
+        request.setEndPoint(dsoaCommonUtils.NODE_URL + '/api/' + dsoaCommonUtils.NODE_NAME + '/renewAgreement?agreementNumber=' + agreementNumber);
         request.setMethod('POST');
         HttpResponse response = httpProtocol.send(request);
         return response.getBody();
@@ -94,7 +90,7 @@ global with sharing class AgreementDashboardController {
     global static String amendAgreement(String agreementNumber) {
         Http httpProtocol = new Http();
         HttpRequest request = new HttpRequest();
-        request.setEndPoint('callout:DSOA_Network_API' + '/api/' + dsoaCommonUtils.NODE_NAME + '/amendAgreement?agreementNumber=' + agreementNumber);
+        request.setEndPoint(dsoaCommonUtils.NODE_URL + '/api/' + dsoaCommonUtils.NODE_NAME + '/amendAgreement?agreementNumber=' + agreementNumber);
         request.setMethod('POST');
         HttpResponse response = httpProtocol.send(request);
         return response.getBody();
@@ -104,7 +100,7 @@ global with sharing class AgreementDashboardController {
     global static String terminateAgreement(String agreementNumber) {
         Http httpProtocol = new Http();
         HttpRequest request = new HttpRequest();
-        request.setEndPoint('callout:DSOA_Network_API' + '/api/' + dsoaCommonUtils.NODE_NAME + '/terminateAgreement?agreementNumber=' + agreementNumber);
+        request.setEndPoint(dsoaCommonUtils.NODE_URL + '/api/' + dsoaCommonUtils.NODE_NAME + 'terminateAgreement?agreementNumber=' + agreementNumber);
         request.setMethod('POST');
         HttpResponse response = httpProtocol.send(request);
         return response.getBody();
@@ -115,7 +111,7 @@ global with sharing class AgreementDashboardController {
     global static String expireAgreement(String agreementNumber) {
          Http httpProtocol = new Http();
         HttpRequest request = new HttpRequest();
-        request.setEndPoint('callout:DSOA_Network_API' + '/api/' + dsoaCommonUtils.NODE_NAME + '/expireAgreement?agreementNumber=' + agreementNumber);
+        request.setEndPoint(dsoaCommonUtils.NODE_URL + '/api/' + dsoaCommonUtils.NODE_NAME + '/expireAgreement?agreementNumber=' + agreementNumber);
         request.setMethod('POST');
         HttpResponse response = httpProtocol.send(request);
         return response.getBody();

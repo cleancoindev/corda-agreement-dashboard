@@ -1,9 +1,10 @@
-// Dapps Incorporated 2020. All Rights Reserved.
+// Dapps Incorporated. 2020. All Rights Reserved.
 
 global with sharing class dsoaCommonUtils {
     
-    public static  String NODE_URL = '';
-    public static  String NODE_NAME = '';
+    public static  String NODE_URL = getNodeURL();
+    public static  String NODE_NAME = getNodeName();
+    public static  String USER_ID =  getUserId();
     public static  String MASTER_KEY = '';
     public static  Boolean ENCRYPT_RESPONSE = false; 
   
@@ -31,20 +32,35 @@ global with sharing class dsoaCommonUtils {
     
     public static string getNodeName() {
         String nodeName = '';
-    	List<dsoa__Network_Settings__mdt> nodesettings = [SELECT dsoa__nodeName__c FROM dsoa__Network_Settings__mdt WHERE MasterLabel='Properties'];
+    	List<dsoa__Node_Setting__mdt> nodesettings = [SELECT dsoa__Name__c FROM dsoa__Node_Setting__mdt WHERE MasterLabel='Properties'];
         if(!nodesettings.isEmpty()){
-            nodeName = nodesettings.get(0).dsoa__nodeName__c;
+            nodeName = nodesettings.get(0).dsoa__Name__c;
         }
         
         return nodeName;
+    }
+    
+     public static string getNodeURL() {
+        String nodeURL = '';
+    	List<dsoa__Node_Setting__mdt> nodesettings = [SELECT dsoa__Node_URL__c FROM dsoa__Node_Setting__mdt WHERE MasterLabel='Properties'];
+        if(!nodesettings.isEmpty()){
+            nodeURL = nodesettings.get(0).dsoa__Node_URL__c;
+        }
+        
+        return nodeURL;
+    }
+    
+    public static string getUserId() {
+        String userId = UserInfo.getUserId();
+        
+        return userId;
     }
         
   		@RemoteAction
  		global static String verifyUser(){
         return HttpUtils.submitRequestWithMethod('{}', 'verifyUser');
  	    }
-
-
+    /* Commented as not refered from anywhere
     public class CustomMetadataCallback implements Metadata.DeployCallback {
         public void handleResult(Metadata.DeployResult result,
                                  Metadata.DeployCallbackContext context) {
@@ -78,17 +94,18 @@ global with sharing class dsoaCommonUtils {
         system.debug('Job ID:'+jobId);
         
     }
+    */
     
     public static void sendErrroMail(String errorMessage,String subject){              
         try{
             Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
-             String[] toAddresses = new String[] {'devops@dapps-inc.com'};
+             String[] toAddresses = new String[] {'domsteil14@gmail.com'};
              mail.setToAddresses(toAddresses);
              mail.setReplyTo('support@id.com');  
              mail.setSenderDisplayName('Apex error message : '+subject);
              mail.setSubject('Error from Org : ' + UserInfo.getOrganizationName());
              mail.setPlainTextBody(errorMessage);
-
+             //Messaging.sendEmail(new Messaging.SingleEmailMessage[] { mail });
         }catch(Exception e){
             system.debug('Error in Email');
             system.debug(e);

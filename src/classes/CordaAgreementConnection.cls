@@ -24,7 +24,7 @@ global class CordaAgreementConnection
             String entity = context.tableSelections[i].tableSelected;
 
             // Search usernames
-            String url = 'callout:dsoa__DSOA_Network_API' + '/api/' + dsoaCommonUtils.NODE_NAME + '/getAgreements'
+            String url = dsoaCommonUtils.NODE_URL + '/api/' + dsoaCommonUtils.NODE_NAME + '/getAgreements'
                             + context.searchPhrase;
             results.add(DataSource.TableResult.get(
                     true, null, entity, getData(url)));
@@ -54,12 +54,12 @@ global class CordaAgreementConnection
             if (thisColumnName != null &&
                (thisColumnName.equals('ExternalId') ||
                 thisColumnName.equals('linearId')))
-                url = 'callout:callout:dsoa__DSOA_Network_API' + '/api/' + dsoaCommonUtils.NODE_NAME + '/getAgreements'
+                url = dsoaCommonUtils.NODE_URL + '/api/' + dsoaCommonUtils.NODE_NAME + '/getAgreements'
                         + filter.columnValue;
             else
-                    url = 'callout:dsoa__DSOA_Network_API' + '/api/' + dsoaCommonUtils.NODE_NAME + '/getAgreements';
+                    url = dsoaCommonUtils.NODE_URL + '/api/' + dsoaCommonUtils.NODE_NAME + '/getAgreements';
         } else {
-            url = 'callout:dsoa__DSOA_Network_API' + '/api/' + dsoaCommonUtils.NODE_NAME + '/getAgreements';
+            url = dsoaCommonUtils.NODE_URL + '/api/' + dsoaCommonUtils.NODE_NAME + '/getAgreements';
         }
 
         /**
@@ -209,7 +209,7 @@ global class CordaAgreementConnection
      **/
     public String getResponse(String url) {
         // Perform callouts for production (non-test) results.
-        url = 'callout:dsoa__DSOA_Network_API' + '/api/' + dsoaCommonUtils.NODE_NAME + '/getAgreements';
+        url = dsoaCommonUtils.NODE_URL + '/api/' + dsoaCommonUtils.NODE_NAME + '/getAgreements';
         Http httpProtocol = new Http();
         HttpRequest request = new HttpRequest();
         request.setEndPoint(url);
